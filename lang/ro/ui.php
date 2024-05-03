@@ -15,4 +15,5 @@ return [
     'massDelete' => 'Ștergere în masă',
     'restore' => 'Restaurare',
     'forceDelete' => 'Ștergere definitivă',
+    'custom' => 'Personalizat',
 ];

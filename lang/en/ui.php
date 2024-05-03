@@ -15,4 +15,5 @@ return [
     'massDelete' => 'Mass delete',
     'restore' => 'Restore',
     'forceDelete' => 'Force delete',
+    'custom' => 'Custom',
 ];

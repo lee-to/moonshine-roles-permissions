@@ -59,3 +59,13 @@ Optional parameters:
 -   name: The name of the resource. If not specified, you will be prompted to enter it.
 -   model: The name of the model. If not specified, the name of the resource will be used.
 -   title: The title of the resource. If not specified, the name of the resource will be used.
+
+### 7) Command: `php artisan moonshine-rbac:permission {permission?} {guard?}`
+This command specifically creates a unique permission
+named Custom.{permission}, it does not create by abilities (view, viewAny, ...).
+
+Required parameters:
+-   permission: The name of the permission.
+
+Optional parameters:
+-   guard: The name of the guard. If not specified, the default guard will be used.

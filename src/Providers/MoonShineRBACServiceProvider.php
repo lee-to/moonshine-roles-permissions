@@ -8,6 +8,7 @@ use MoonShine\Contracts\Resources\ResourceContract;
 use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACAssignPermissionCommand;
 use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACCreatePermissionsResourceCommand;
 use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACInstallCommand;
+use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACPermissionCustomCommand;
 use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACResourceCommand;
 use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACRoleCreateCommand;
 use Sweet1s\MoonshineRBAC\Commands\MoonShineRBACUserCommand;
@@ -22,7 +23,8 @@ final class MoonShineRBACServiceProvider extends ServiceProvider
         MoonShineRBACRoleCreateCommand::class,
         MoonShineRBACUserCommand::class,
         MoonShineRBACResourceCommand::class,
-        MoonShineRBACCreatePermissionsResourceCommand::class
+        MoonShineRBACCreatePermissionsResourceCommand::class,
+        MoonShineRBACPermissionCustomCommand::class
     ];
 
     public function register(): void

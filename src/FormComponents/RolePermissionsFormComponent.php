@@ -2,7 +2,9 @@
 
 namespace Sweet1s\MoonshineRBAC\FormComponents;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use MoonShine\Components\FormBuilder;
 use MoonShine\Components\MoonShineComponent;
 use MoonShine\Decorations\Column;
@@ -18,6 +20,9 @@ use MoonShine\Traits\WithLabel;
 final class RolePermissionsFormComponent extends MoonShineComponent
 {
     protected string $view = 'moonshine-rbac::form-components.permissions';
+    protected bool $all = true;
+    protected array $values = [];
+    protected array $elements = [];
 
     use HasResource;
     use WithLabel;
@@ -46,10 +51,6 @@ final class RolePermissionsFormComponent extends MoonShineComponent
     {
         $currentUser = MoonShineAuth::guard()->user();
 
-        $elements = [];
-        $values = [];
-        $all = true;
-
         foreach (moonshine()->getResources() as $resource) {
             $checkboxes = [];
             $class = class_basename($resource::class);
@@ -70,14 +71,14 @@ final class RolePermissionsFormComponent extends MoonShineComponent
                     continue;
                 }
 
-                $values['permissions'][$class][$ability] = $this->getItem()?->isHavePermission(
+                $this->values['permissions'][$class][$ability] = $this->getItem()?->isHavePermission(
                     $class,
                     $ability
                 );
 
-                if (!$values['permissions'][$class][$ability]) {
+                if (!$this->values['permissions'][$class][$ability]) {
                     $allSections = false;
-                    $all = false;
+                    $this->all = false;
                 }
 
                 $checkboxes[] = Switcher::make(
@@ -92,7 +93,7 @@ final class RolePermissionsFormComponent extends MoonShineComponent
                 continue;
             }
 
-            $elements[] = Column::make([
+            $this->elements[] = Column::make([
                 Switcher::make($resource->title())->customAttributes([
                     'class' => 'permission_switcher_section',
                     '@change' => "document
@@ -105,6 +106,8 @@ final class RolePermissionsFormComponent extends MoonShineComponent
             ])->columnSpan(6);
         }
 
+        $this->customPermissions($currentUser);
+
         return FormBuilder::make(route('moonshine-rbac.roles.attach-permissions-to-role', $this->getItem()->getKey()))
             ->fields([
                 $this->priorityField(),
@@ -115,13 +118,13 @@ final class RolePermissionsFormComponent extends MoonShineComponent
                           .querySelectorAll('.permission_switcher, .permission_switcher_section')
                           .forEach((el) => {el.checked = !parseInt(event.target.value); el.dispatchEvent(new Event('change'))})
                     JS,
-                ])->setValue($all),
+                ])->setValue($this->all),
                 Divider::make(),
                 Grid::make(
-                    $elements
+                    $this->elements
                 ),
             ])
-            ->fill($values)
+            ->fill($this->values)
             ->submit(__('moonshine::ui.save'));
     }
 
@@ -150,5 +153,72 @@ final class RolePermissionsFormComponent extends MoonShineComponent
             'item' => $this->getItem(),
             'resource' => $this->getResource(),
         ];
+    }
+
+    /**
+     * @param $currentUser
+     * @return void
+     */
+    protected function customPermissions($currentUser): void
+    {
+        $checkboxes = [];
+        $allSelections = true;
+
+        foreach (config('permission.models.permission')::where('name', 'LIKE', '%Custom.%')->get() as $permission) {
+
+            $hasPermission = false;
+
+            foreach ($currentUser->roles as $role) {
+                if ($role->isHavePermission(permission: $permission->name)) {
+                    $hasPermission = true;
+                    break;
+                }
+            }
+
+            if (!$hasPermission) {
+                continue;
+            }
+
+            $permission->name = Str::remove('Custom.', $permission->name);
+            $this->values['permissions']['Custom'][$permission->name] = $this->getItem()?->isHavePermission(permission: 'Custom.' . $permission->name);
+
+            if (!$this->values['permissions']['Custom'][$permission->name]) {
+                $allSelections = false;
+                $this->all = false;
+            }
+
+            $checkboxes[] = Switcher::make(
+                $permission->name,
+                "permissions.Custom." . $permission->name
+            )
+                ->customAttributes(['class' => 'permission_switcher ' . 'customs'])
+                ->setName("permissions[Custom][$permission->name]");
+        }
+
+        $checkboxes = collect($checkboxes)->split(2)->toArray();
+
+        if (!empty($checkboxes)) {
+            $this->elements[] = Column::make([
+                Switcher::make(trans('moonshine-rbac::ui.custom'))->customAttributes([
+                    'class' => 'permission_switcher_section',
+                    '@change' => "document
+                          .querySelectorAll('.customs')
+                          .forEach((el) => {el.checked = !parseInt(event.target.value); el.dispatchEvent(new Event('change'))})",
+                ])->setValue($allSelections)->hint('Toggle off/on all'),
+
+                Divider::make(),
+
+                Grid::make([
+                    Column::make([
+                        ...$checkboxes[0] ?? [],
+                    ])->columnSpan(6),
+                    Column::make([
+                        ...$checkboxes[1] ?? [],
+                    ])->columnSpan(6),
+                ]),
+
+                Divider::make(),
+            ])->columnSpan(12);
+        }
     }
 }

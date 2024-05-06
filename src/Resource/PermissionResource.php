@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\MoonShine\Resources;
+namespace Sweet1s\MoonshineRBAC\Resource;
 
-use App\Models\Permission;
 use Illuminate\Database\Eloquent\Model;
 use MoonShine\Components\MoonShineComponent;
 use MoonShine\Decorations\Block;
@@ -15,7 +14,6 @@ use MoonShine\Fields\Text;
 use MoonShine\Resources\ModelResource;
 use Sweet1s\MoonshineRBAC\Abilities;
 use Sweet1s\MoonshineRBAC\Traits\WithRolePermissions;
-
 
 class PermissionResource extends ModelResource
 {

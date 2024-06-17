@@ -42,6 +42,10 @@ class MoonShineRBACInstallCommand extends Command
             'resourceName' => 'RoleResource'
         ]);
 
+        $this->call('moonshine-rbac:permissions', [
+            'resourceName' => 'PermissionResource'
+        ]);
+
         $this->createRole();
 
         info('MoonShine Roles-Permissions package installed successfully.');

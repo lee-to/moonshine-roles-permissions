@@ -19,16 +19,14 @@ class PermissionResource extends ModelResource
 {
     use WithRolePermissions;
 
-    protected string $title = 'Permissions';
-
     public function __construct()
     {
         $this->model = config('permission.models.permission');
     }
 
-    public function getTitle(): string
+    public function title(): string
     {
-        return trans('moonshine-rbac::ui.permissions');
+        return trans('moonshine-rbac::ui.permissions') ?? 'Permissions';
     }
 
     /**

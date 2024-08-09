@@ -16,6 +16,7 @@ use MoonShine\MoonShineAuth;
 use MoonShine\Resources\ModelResource;
 use MoonShine\Traits\HasResource;
 use MoonShine\Traits\WithLabel;
+use Sweet1s\MoonshineRBAC\Traits\WithRolePermissions;
 
 final class RolePermissionsFormComponent extends MoonShineComponent
 {
@@ -35,9 +36,8 @@ final class RolePermissionsFormComponent extends MoonShineComponent
 
     public function __construct(
         Closure|string $label,
-        ModelResource  $resource
-    )
-    {
+        ModelResource $resource
+    ) {
         $this->setResource($resource);
         $this->setLabel($label);
     }
@@ -56,8 +56,11 @@ final class RolePermissionsFormComponent extends MoonShineComponent
             $class = class_basename($resource::class);
             $allSections = true;
 
-            foreach ($resource->gateAbilities() as $ability) {
+            if (!in_array(WithRolePermissions::class, class_uses($resource))) {
+                continue;
+            }
 
+            foreach ($resource->gateAbilities() as $ability) {
                 $hasPermission = false;
 
                 foreach ($currentUser->roles as $role) {
@@ -94,7 +97,7 @@ final class RolePermissionsFormComponent extends MoonShineComponent
             }
 
             $this->elements[] = Column::make([
-                Switcher::make($resource->title())->customAttributes([
+                Switcher::make(__('moonshine-rbac::ui.all') . ' ' . $resource->title())->customAttributes([
                     'class' => 'permission_switcher_section',
                     '@change' => "document
                           .querySelectorAll('.$class')
@@ -165,7 +168,6 @@ final class RolePermissionsFormComponent extends MoonShineComponent
         $allSelections = true;
 
         foreach (config('permission.models.permission')::where('name', 'LIKE', '%Custom.%')->get() as $permission) {
-
             $hasPermission = false;
 
             foreach ($currentUser->roles as $role) {
